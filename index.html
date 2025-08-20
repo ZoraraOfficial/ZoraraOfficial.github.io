@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoonClient Lua Scripting – Docs</title>
+  <style>
+    :root { --bg:#0f1115; --panel:#151821; --muted:#9aa4b2; --text:#e5e7eb; --accent:#6ee7b7; --code:#0b0d12; --border:#232736; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; background:var(--bg); color:var(--text); line-height:1.6; }
+    header { position:sticky; top:0; background:rgba(15,17,21,.9); backdrop-filter:saturate(180%) blur(8px); border-bottom:1px solid var(--border); z-index:10; }
+    header .wrap { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 22px; max-width:1100px; margin:0 auto; }
+    header h1 { font-size:18px; margin:0; letter-spacing:.2px; }
+    header nav a { color:var(--muted); text-decoration:none; margin-left:14px; font-size:14px; }
+    header nav a:hover { color:var(--text); }
+    main { max-width:1100px; margin:0 auto; padding:26px 22px 80px; }
+    section { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px 18px; margin:16px 0; }
+    h2 { font-size:18px; margin:0 0 8px; }
+    h3 { font-size:16px; margin:16px 0 8px; }
+    p { margin:8px 0; color:var(--muted); }
+    ul { margin:8px 0 8px 22px; color:var(--muted); }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    code.inline { background:var(--code); padding:2px 6px; border-radius:6px; color:#e8f0fe; }
+    pre { background:var(--code); border:1px solid var(--border); color:#e8f0fe; border-radius:10px; padding:14px; overflow:auto; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:12px; }
+    .kbd { border:1px solid var(--border); border-bottom-width:3px; padding:1px 6px; border-radius:6px; background:#0e1016; color:#d8dee9; font-weight:600; font-size:12px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); color:var(--muted); }
+    th { color:#cbd5e1; font-weight:600; }
+    .tag { display:inline-block; padding:1px 8px; border:1px solid var(--border); border-radius:999px; font-size:12px; color:#cbd5e1; background:#0f131a; }
+    .accent { color:var(--accent); font-weight:600; }
+    .callout { border-left:3px solid var(--accent); padding:10px 12px; background:#0e1318; border-radius:6px; }
+  </style>
+  <script>
+    function go(id){ const el = document.getElementById(id); if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); } }
+  </script>
+  <!-- Generated from codebase: FurFrags Lua system (MoonSharp) -->
+  <!-- This page documents how to use the in-game Lua system and its APIs. -->
+  <!-- Paths, callbacks, and APIs are derived from the code in this repository. -->
+  <!-- Key classes: LuaManager, ScriptData, EnvironmentUtility, L* method classes, and proxies. -->
+  <!-- Last updated: now -->
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="Documentation for the MoonClient Lua scripting system: setup, callbacks, APIs, examples, and enums." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M3 11l7-7 7 7v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3C/svg%3E">
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>MoonClient Lua Scripting</h1>
+      <nav>
+        <a href="#" onclick="go('quickstart')">Quick Start</a>
+        <a href="#" onclick="go('callbacks')">Callbacks</a>
+        <a href="#" onclick="go('apis')">APIs</a>
+        <a href="#" onclick="go('enums')">Enums</a>
+        <a href="#" onclick="go('examples')">Examples</a>
+        <a href="#" onclick="go('faq')">FAQ</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section id="quickstart">
+      <h2>Quick Start</h2>
+      <div class="grid">
+        <div>
+          <h3>1) Script folder</h3>
+          <p>Place your <span class="tag">.lua</span> files in:</p>
+          <pre>%AppData%\MoonClient\lua</pre>
+          <p>In the UI, go to <span class="accent">Configuration → Scripts</span> and click <span class="kbd">Open Scripts Directory</span>.</p>
+        </div>
+        <div>
+          <h3>2) Load / unload</h3>
+          <ul>
+            <li>Open <span class="accent">Configuration → Scripts</span>.</li>
+            <li>Left-click a script button to <span class="accent">Load</span> or <span class="accent">Unload</span>.</li>
+            <li>Right-click a script button to open it in your editor.</li>
+          </ul>
+          <p class="callout"><strong>Auto reload:</strong> Enable <em>Auto Reload Scripts</em> to hot-reload on file save.</p>
+        </div>
+        <div>
+          <h3>3) Safe/unsafe features</h3>
+          <p>HTTP access is blocked by default. Toggle <em>Allow Unsafe Scripts</em> inside <span class="accent">Configuration → Scripts</span> to enable <code class="inline">HTTP</code>.</p>
+        </div>
+      </div>
+      <h3>Printing & Logging</h3>
+      <p><code class="inline">print("hello")</code> writes to the in-game console as Lua logs.</p>
+    </section>
+
+    <section id="callbacks">
+      <h2>Script Callbacks</h2>
+      <p>Define any of these global functions in your <span class="tag">.lua</span> file. They are optional.</p>
+      <table>
+        <thead><tr><th>Callback</th><th>When it runs</th><th>Parameters</th></tr></thead>
+        <tbody>
+          <tr><td><code>OnUpdate()</code></td><td>Every frame</td><td>—</td></tr>
+          <tr><td><code>OnFixedUpdate()</code></td><td>Fixed timestep</td><td>—</td></tr>
+          <tr><td><code>OnGUI()</code></td><td>During Unity OnGUI</td><td>—</td></tr>
+          <tr><td><code>OnPreSpy(type)</code></td><td>Before taking a spy screenshot</td><td><code>type</code>: int (see SpyType)</td></tr>
+          <tr><td><code>OnGetSpy(image)</code></td><td>With the spy image</td><td><code>image</code>: <code>Texture2D</code></td></tr>
+          <tr><td><code>OnPostSpy()</code></td><td>After spy completes</td><td>—</td></tr>
+          <tr><td><code>OnGetFlags(ent, flags)</code></td><td>When building ESP flag strings</td><td><code>ent</code>: <code>CollectedEntity</code>, <code>flags</code>: <code>FlagInfo</code></td></tr>
+          <tr><td><code>OnSendInput(info, usage)</code></td><td>When sending weapon raycast input</td><td><code>info</code>: <code>RaycastInfo</code>, <code>usage</code>: <code>ERaycastInfoUsage</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="apis">
+      <h2>Global APIs</h2>
+      <p>The following objects are available to Lua scripts:</p>
+      <div class="grid">
+        <div>
+          <h3>Entity</h3>
+          <ul>
+            <li><code>Entity.GetEntities(typeInt)</code> → <code>CollectedEntity[]</code></li>
+            <li><code>Entity.GetLocalPlayer()</code> → <code>CollectedEntity</code> or <code>nil</code></li>
+            <li><code>Entity.GetCurrentVehicle()</code> → <code>InteractableVehicle</code> or <code>nil</code></li>
+          </ul>
+          <p><em>Note:</em> <code>typeInt</code> is a number (see EntityType values below).</p>
+        </div>
+        <div>
+          <h3>Render</h3>
+          <ul>
+            <li><code>Render.WorldToScreen(x,y,z)</code> / <code>Render.WorldToScreen(Vector3)</code> → <code>Vector3</code></li>
+            <li><code>Render.InScreen(v3)</code> → <code>bool</code></li>
+            <li><code>Render.Event()</code> → current <code>Event</code></li>
+            <li><code>Render.Notify(text, typeInt, timeSec?)</code></li>
+            <li><code>Render.LoadOSFont(name, size)</code> → <code>Font</code></li>
+            <li><code>Render.GetOSFonts()</code> → <code>string[]</code></li>
+            <li><code>Render.GetESPFlagStyle()</code> / <code>GetESPNameStyle()</code> → <code>GUIStyle</code></li>
+            <li><code>Render.GetCamera()</code> → <code>Camera</code></li>
+            <li><code>Render.IsCursorLocked()</code> / <code>Render.SetCursorLocked(bool)</code></li>
+            <li><code>Render.DrawHealthBar(verts2[4], current, max)</code></li>
+            <li><code>Render.Draw2DBox(verts2[4], color)</code></li>
+            <li><code>Render.Draw3DBox(bounds, color)</code></li>
+            <li><code>Render.DrawScreenLine(from2, to2, color)</code></li>
+            <li><code>Render.DrawWorldLine(from3, to3, color)</code></li>
+          </ul>
+          <p><em>Note:</em> <code>typeInt</code> for notifications is a number (see NotificationType).</p>
+        </div>
+        <div>
+          <h3>Cheat</h3>
+          <ul>
+            <li><code>Cheat.Spying()</code> → <code>bool</code></li>
+            <li><code>Cheat.InGame()</code> → <code>bool</code></li>
+            <li><code>Cheat.GetSilentAimTarget()</code> → <code>CollectedEntity</code> or <code>nil</code></li>
+            <li><code>Cheat.GetSilentAimPoint()</code> → <code>Vector3</code></li>
+            <li><code>Cheat.GetDamageDealt(info, usage)</code> → <code>int</code></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Reflection</h3>
+          <ul>
+            <li><code>Reflection.GetMethod(klass, name, isStatic, isPrivate)</code> → <code>PMethodInfo</code></li>
+            <li><code>Reflection.GetField(klass, name, isStatic, isPrivate)</code> → <code>PFieldInfo</code></li>
+          </ul>
+          <p>
+            <code>PMethodInfo</code>:
+            <code>Invoke(instance?, params?)</code>, <code>Patch(executionContext, function)</code><br />
+            <code>PFieldInfo</code>: <code>Get(instance?)</code>, <code>Set(instance, value)</code>
+          </p>
+        </div>
+        <div>
+          <h3>New</h3>
+          <ul>
+            <li><code>New.Vector2()</code>, <code>New.Vector2(x,y)</code></li>
+            <li><code>New.Vector3()</code>, <code>New.Vector3(x,y,z)</code></li>
+            <li><code>New.Color(r,g,b,a?)</code>, <code>New.Color32(r,g,b,a?)</code></li>
+            <li><code>New.Rect(x,y,w,h)</code>, <code>New.Rect(pos2,size2)</code>, <code>New.Rect()</code></li>
+            <li><code>New.GUIContent(text)</code></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Assert</h3>
+          <ul>
+            <li><code>Assert.IsValid(SteamPlayer)</code> → <code>bool</code></li>
+            <li><code>Assert.IsValid(MonoBehaviour)</code> → <code>bool</code></li>
+            <li><code>Assert.IsValid(CollectedEntity)</code> → <code>bool</code></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Assets</h3>
+          <ul>
+            <li><code>Assets.LoadImage(tex2D, bytes)</code></li>
+            <li><code>Assets.LoadAssetBundle(bytes)</code> → <code>PAssetBundle</code></li>
+            <li><code>Assets.PlayAudioClip(clip, volume?)</code></li>
+          </ul>
+          <p><code>PAssetBundle</code> accessors: <code>GetFonts()</code>, <code>GetShaders()</code>, <code>GetAudioClips()</code>, <code>GetMaterials()</code>, <code>GetTextures()</code>, <code>GetGUISkins()</code>, <code>Unload()</code>.</p>
+        </div>
+        <div>
+          <h3>HTTP</h3>
+          <ul>
+            <li><code>HTTP.Get(uri, headersArray)</code> → <code>PResponse</code> or <code>nil</code></li>
+            <li><code>HTTP.Post(uri, headersArray, body)</code> → <code>PResponse</code> or <code>nil</code></li>
+          </ul>
+          <p><code>PResponse</code>: <code>GetString()</code>, <code>GetBytes()</code>. Requires <em>Allow Unsafe Scripts</em>.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="enums">
+      <h2>Enums as numbers</h2>
+      <p>When an API expects an enum, pass the corresponding number.</p>
+      <div class="grid">
+        <div>
+          <h3>EntityType</h3>
+          <table>
+            <thead><tr><th>Name</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Priority_Player</td><td>0</td></tr>
+              <tr><td>Friendly_Player</td><td>1</td></tr>
+              <tr><td>Local_Player</td><td>2</td></tr>
+              <tr><td>Player</td><td>3</td></tr>
+              <tr><td>Vehicle</td><td>4</td></tr>
+              <tr><td>Zombie</td><td>5</td></tr>
+              <tr><td>Item</td><td>6</td></tr>
+              <tr><td>Sentry_Gun</td><td>7</td></tr>
+              <tr><td>Bed</td><td>8</td></tr>
+              <tr><td>Claim_Flag</td><td>9</td></tr>
+              <tr><td>Storage</td><td>10</td></tr>
+              <tr><td>Care_Package</td><td>11</td></tr>
+              <tr><td>Generator</td><td>12</td></tr>
+              <tr><td>Animal</td><td>13</td></tr>
+              <tr><td>NPC</td><td>14</td></tr>
+              <tr><td>Plant</td><td>15</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h3>NotificationType</h3>
+          <table>
+            <thead><tr><th>Name</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Success</td><td>0</td></tr>
+              <tr><td>Info</td><td>1</td></tr>
+              <tr><td>Warning</td><td>2</td></tr>
+              <tr><td>Error</td><td>3</td></tr>
+              <tr><td>Load</td><td>4</td></tr>
+              <tr><td>Lua</td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <h3>SpyType</h3>
+          <table>
+            <thead><tr><th>Name</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Remove_Visuals</td><td>1</td></tr>
+              <tr><td>Return_No_Image</td><td>2</td></tr>
+              <tr><td>Return_Random_Image</td><td>3</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="examples">
+      <h2>Examples</h2>
+
+      <h3>Hello world + notify</h3>
+      <pre><code>-- %AppData%\MoonClient\lua\hello.lua
+print("hello from lua!")
+
+function OnGUI()
+  if Cheat.InGame() then
+    Render.Notify("Hello from Lua!", 5, 3) -- NotificationType.Lua = 5
+  end
+end
+</code></pre>
+
+      <h3>Simple ESP flag</h3>
+      <pre><code>-- Adds a custom flag line to each player/entity
+function OnGetFlags(ent, flags)
+  -- Always check entity validity if needed
+  if ent ~= nil then
+    flags:Add("Custom Flag")
+  end
+end
+</code></pre>
+
+      <h3>Draw a line on screen</h3>
+      <pre><code>function OnGUI()
+  local a = New.Vector2(100, 100)
+  local b = New.Vector2(300, 220)
+  local red = New.Color(1, 0, 0, 1)
+  Render.DrawScreenLine(a, b, red)
+end
+</code></pre>
+
+      <h3>World to screen</h3>
+      <pre><code>function OnGUI()
+  -- draw a dot at the local player's position
+  local lp = Entity.GetLocalPlayer()
+  if lp ~= nil then
+    local pos = lp.gameObject_0.transform.position
+    local s = Render.WorldToScreen(pos)
+    if Render.InScreen(s) then
+      local p = New.Vector2(s.x, s.y)
+      local q = New.Vector2(s.x+5, s.y)
+      Render.DrawScreenLine(p, q, New.Color(0, 1, 0, 1))
+    end
+  end
+end
+</code></pre>
+
+      <h3>HTTP request (requires Allow Unsafe Scripts)</h3>
+      <pre><code>function OnUpdate()
+  if not _done then
+    _done = true
+    local headers = {"Accept: application/json", "User-Agent: MoonClientLua"}
+    local res = HTTP.Get("https://httpbin.org/json", headers)
+    if res ~= nil then
+      local text = res:GetString()
+      print("HTTP: " .. string.sub(text, 1, 80) .. "...")
+    else
+      print("HTTP disabled or failed")
+    end
+  end
+end
+</code></pre>
+
+      <h3>Reflection patch (advanced)</h3>
+      <pre><code>-- Patch a method; return false from the handler to skip original
+-- Example: Reflection.GetMethod("Namespace.Class", "Method", true, false)
+function OnUpdate()
+  if _patched then return end
+  local m = Reflection.GetMethod("SDG.Unturned.Provider", "update", true, false)
+  if m ~= nil then
+    m:Patch(_ENV, function(self, ...)
+      -- your logic here; return true to continue original, false to skip
+      return true
+    end)
+    _patched = true
+    print("Patched Provider.update")
+  end
+end
+</code></pre>
+    </section>
+
+    <section id="faq">
+      <h2>FAQ</h2>
+      <h3>Where are scripts stored?</h3>
+      <p><code class="inline">%AppData%\MoonClient\lua</code>. Use <em>Open Scripts Directory</em> in the UI.</p>
+      <h3>How do I import from clipboard?</h3>
+      <p>In <em>Configuration → Scripts</em>, click <strong>Import Script</strong>. Your clipboard will be saved to <code class="inline">Imported Script N.lua</code>.</p>
+      <h3>How do I enable HTTP?</h3>
+      <p>Toggle <em>Allow Unsafe Scripts</em> in <em>Configuration → Scripts</em>.</p>
+      <h3>How do I hot-reload?</h3>
+      <p>Enable <em>Auto Reload Scripts</em>. Saving the file in your editor will reload it in-game.</p>
+      <h3>Where do logs show?</h3>
+      <p>Use <code class="inline">print()</code>. Messages appear in the in-game console as Lua logs.</p>
+    </section>
+
+    <section>
+      <p style="text-align:center;color:#6b7280;margin-top:22px;">MoonClient Lua Scripting • MoonSharp • This page documents the in-game Lua API exposed by the client.</p>
+    </section>
+  </main>
+</body>
+</html>
+
+
